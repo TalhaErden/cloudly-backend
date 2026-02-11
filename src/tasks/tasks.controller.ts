@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/create-task.dto';
-import { UpdateTaskDto } from './dto/update-task.dto';
+import { MoveTaskDto } from './dto/move-task.dto'; // Yeni oluşturduğumuz DTO
 
 @Controller('tasks')
 export class TasksController {
@@ -17,18 +17,12 @@ export class TasksController {
     return this.tasksService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.tasksService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTaskDto: UpdateTaskDto) {
-    return this.tasksService.update(+id, updateTaskDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.tasksService.remove(+id);
+  // --- CHALLENGE ENDPOINT ---
+  // İstek: PATCH /tasks/1/move
+  // Body: { "targetProjectId": 5 }
+  @Patch(':id/move')
+  moveTask(@Param('id') id: string, @Body() moveTaskDto: MoveTaskDto) {
+    // URL'den gelen id string gelir, başına + koyarak number'a çeviriyoruz.
+    return this.tasksService.moveTask(+id, moveTaskDto.targetProjectId);
   }
 }
