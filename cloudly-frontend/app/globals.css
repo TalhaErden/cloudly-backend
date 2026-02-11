@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+/* DİKKAT: Klasörleri app dışına taşıdığımız için 
+   Tailwind'e yerlerini gösteriyoruz:
+*/
+@source "../components";
+@source "../store";
+
+/* Genel Sayfa Rengi */
+body {
+  background-color: #f8fafc;
+  color: #1f2937;
+}
