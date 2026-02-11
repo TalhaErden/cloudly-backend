@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
-/* DİKKAT: Klasörleri app dışına taşıdığımız için 
-   Tailwind'e yerlerini gösteriyoruz:
+/* DİKKAT: Klasörleri app dışına taşıdığımız için
+Tailwind'e yerlerini gösteriyoruz:
 */
 @source "../components";
 @source "../store";
