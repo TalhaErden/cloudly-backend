@@ -48,6 +48,17 @@ export class TasksService {
   async update(id: number, updateTaskDto: UpdateTaskDto) {
     const task = await this.findOne(id);
 
+    // Validate projectId if provided
+    if (updateTaskDto.projectId) {
+      const projectExists = await this.projectRepo.findOne({
+        where: { id: updateTaskDto.projectId }
+      });
+      
+      if (!projectExists) {
+        throw new BadRequestException(`Project #${updateTaskDto.projectId} not found`);
+      }
+    }
+
     try {
       this.taskRepo.merge(task, updateTaskDto);
       return await this.taskRepo.save(task);

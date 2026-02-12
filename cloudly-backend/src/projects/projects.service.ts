@@ -37,6 +37,17 @@ export class ProjectsService {
   async update(id: number, updateProjectDto: UpdateProjectDto) {
     const project = await this.findOne(id);
 
+    // Validate organizationId if provided
+    if (updateProjectDto.organizationId) {
+      const organizationExists = await this.projectRepo.manager
+        .getRepository('Organization')
+        .findOne({ where: { id: updateProjectDto.organizationId } });
+      
+      if (!organizationExists) {
+        throw new BadRequestException(`Organization #${updateProjectDto.organizationId} not found`);
+      }
+    }
+
     try {
       this.projectRepo.merge(project, updateProjectDto);
       return await this.projectRepo.save(project);

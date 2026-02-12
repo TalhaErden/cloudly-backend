@@ -71,5 +71,6 @@ export class TasksController {
   @ApiBody({ type: MoveTaskDto })
   @ApiOkResponse({ description: 'Task moved successfully.' })
   moveTask(@Param('id') id: string, @Body() moveTaskDto: MoveTaskDto) {
+    return this.tasksService.moveTask(+id, moveTaskDto.targetProjectId);
   }
 }

@@ -20,6 +20,10 @@ describe('AppController (e2e)', () => {
     return request(app.getHttpServer())
       .get('/')
       .expect(200)
-      .expect('Hello World!');
+      .expect((res) => {
+        if (!res.body.data || res.body.data !== 'Hello World!') {
+          throw new Error('Response envelope format incorrect or wrong data');
+        }
+      });
   });
 });
