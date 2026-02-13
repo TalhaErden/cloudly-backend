@@ -3,12 +3,18 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from './../src/app.module';
+import * as dotenv from 'dotenv';
+
+// .env'yi E2E test'te de yükle
+dotenv.config();
 
 describe('Cloudly Backend API (e2e)', () => {
   let app: INestApplication<App>;
+  let agent: any; // ✅ Supertest agent
   let organizationId: number;
   let projectId: number;
   let taskId: number;
+  const API_KEY = process.env.API_KEY || 'cloudly-secret-key-2026';
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -28,11 +34,15 @@ describe('Cloudly Backend API (e2e)', () => {
     );
     
     await app.init();
+
+    // ✅ Agent'ı oluştur ve default header'ı set et
+    agent = request.agent(app.getHttpServer());
+    agent.set('x-api-key', API_KEY);
   });
 
   describe('AppController', () => {
     it('/ (GET)', () => {
-      return request(app.getHttpServer())
+      return agent
         .get('/')
         .expect(200)
         .expect((res) => {
@@ -45,7 +55,7 @@ describe('Cloudly Backend API (e2e)', () => {
 
   describe('Organizations', () => {
     it('POST /organizations - Create organization', () => {
-      return request(app.getHttpServer())
+      return agent
         .post('/organizations')
         .send({
           name: 'Test Organization',
@@ -61,7 +71,7 @@ describe('Cloudly Backend API (e2e)', () => {
     });
 
     it('POST /organizations - Reject unknown field (forbidNonWhitelisted)', () => {
-      return request(app.getHttpServer())
+      return agent
         .post('/organizations')
         .send({
           name: 'Test Org',
@@ -71,21 +81,21 @@ describe('Cloudly Backend API (e2e)', () => {
     });
 
     it('POST /organizations - Reject empty name', () => {
-      return request(app.getHttpServer())
+      return agent
         .post('/organizations')
         .send({ name: '' })
         .expect(400);
     });
 
     it('POST /organizations - Reject whitespace-only name', () => {
-      return request(app.getHttpServer())
+      return agent
         .post('/organizations')
         .send({ name: '   ' })
         .expect(400);
     });
 
     it('GET /organizations - List all organizations', () => {
-      return request(app.getHttpServer())
+      return agent
         .get('/organizations')
         .expect(200)
         .expect((res) => {
@@ -96,7 +106,7 @@ describe('Cloudly Backend API (e2e)', () => {
     });
 
     it('GET /organizations/:id - Get organization by id', () => {
-      return request(app.getHttpServer())
+      return agent
         .get(`/organizations/${organizationId}`)
         .expect(200)
         .expect((res) => {
@@ -107,7 +117,7 @@ describe('Cloudly Backend API (e2e)', () => {
     });
 
     it('PATCH /organizations/:id - Update organization', () => {
-      return request(app.getHttpServer())
+      return agent
         .patch(`/organizations/${organizationId}`)
         .send({ name: 'Updated Organization' })
         .expect(200)
@@ -119,21 +129,21 @@ describe('Cloudly Backend API (e2e)', () => {
     });
 
     it('POST /organizations - Multiple organizations', () => {
-      return request(app.getHttpServer())
+      return agent
         .post('/organizations')
         .send({ name: 'Another Organization', address: 'Ankara' })
         .expect(201);
     });
 
     it('POST /organizations - Reject empty name', () => {
-      return request(app.getHttpServer())
+      return agent
         .post('/organizations')
         .send({ name: '' })
         .expect(400);
     });
 
     it('POST /organizations - Reject whitespace-only name', () => {
-      return request(app.getHttpServer())
+      return agent
         .post('/organizations')
         .send({ name: '   ' })
         .expect(400);
@@ -142,7 +152,7 @@ describe('Cloudly Backend API (e2e)', () => {
 
   describe('Projects', () => {
     it('POST /projects - Create project', () => {
-      return request(app.getHttpServer())
+      return agent
         .post('/projects')
         .send({
           name: 'Test Project',
@@ -158,7 +168,7 @@ describe('Cloudly Backend API (e2e)', () => {
     });
 
     it('GET /projects - List all projects', () => {
-      return request(app.getHttpServer())
+      return agent
         .get('/projects')
         .expect(200)
         .expect((res) => {
@@ -169,7 +179,7 @@ describe('Cloudly Backend API (e2e)', () => {
     });
 
     it('GET /projects/:id - Get project by id', () => {
-      return request(app.getHttpServer())
+      return agent
         .get(`/projects/${projectId}`)
         .expect(200)
         .expect((res) => {
@@ -180,7 +190,7 @@ describe('Cloudly Backend API (e2e)', () => {
     });
 
     it('PATCH /projects/:id - Update project', () => {
-      return request(app.getHttpServer())
+      return agent
         .patch(`/projects/${projectId}`)
         .send({ name: 'Updated Project' })
         .expect(200)
@@ -192,7 +202,7 @@ describe('Cloudly Backend API (e2e)', () => {
     });
 
     it('PATCH /projects/:id - Update with name only', () => {
-      return request(app.getHttpServer())
+      return agent
         .patch(`/projects/${projectId}`)
         .send({ name: 'Partially Updated Project' })
         .expect(200)
@@ -204,7 +214,7 @@ describe('Cloudly Backend API (e2e)', () => {
     });
 
     it('PATCH /projects/:id - Invalid: non-existent project', () => {
-      return request(app.getHttpServer())
+      return agent
         .patch('/projects/99999')
         .send({ name: 'test' })
         .expect(404);
@@ -213,7 +223,7 @@ describe('Cloudly Backend API (e2e)', () => {
 
   describe('Tasks', () => {
     it('POST /tasks - Create task', () => {
-      return request(app.getHttpServer())
+      return agent
         .post('/tasks')
         .send({
           title: 'Test Task',
@@ -229,7 +239,7 @@ describe('Cloudly Backend API (e2e)', () => {
     });
 
     it('GET /tasks - List all tasks', () => {
-      return request(app.getHttpServer())
+      return agent
         .get('/tasks')
         .expect(200)
         .expect((res) => {
@@ -240,7 +250,7 @@ describe('Cloudly Backend API (e2e)', () => {
     });
 
     it('GET /tasks/:id - Get task by id', () => {
-      return request(app.getHttpServer())
+      return agent
         .get(`/tasks/${taskId}`)
         .expect(200)
         .expect((res) => {
@@ -251,7 +261,7 @@ describe('Cloudly Backend API (e2e)', () => {
     });
 
     it('PATCH /tasks/:id - Update task', () => {
-      return request(app.getHttpServer())
+      return agent
         .patch(`/tasks/${taskId}`)
         .send({ title: 'Updated Task' })
         .expect(200)
@@ -263,14 +273,14 @@ describe('Cloudly Backend API (e2e)', () => {
     });
 
     it('PATCH /tasks/:id - Foreign key validation should fail', () => {
-      return request(app.getHttpServer())
+      return agent
         .patch(`/tasks/${taskId}`)
         .send({ projectId: 99999 })
         .expect(400);
     });
 
     it('PATCH /tasks/:id/move - Move task to another project', () => {
-      return request(app.getHttpServer())
+      return agent
         .post('/projects')
         .send({
           name: 'Target Project',
@@ -278,7 +288,7 @@ describe('Cloudly Backend API (e2e)', () => {
         })
         .then((res) => {
           const targetProjectId = res.body.data.id;
-          return request(app.getHttpServer())
+          return agent
             .patch(`/tasks/${taskId}/move`)
             .send({ targetProjectId })
             .expect(200)
@@ -291,14 +301,14 @@ describe('Cloudly Backend API (e2e)', () => {
     });
 
     it('POST /tasks - Multiple tasks', () => {
-      return request(app.getHttpServer())
+      return agent
         .post('/tasks')
         .send({ title: 'Another Task', projectId: projectId })
         .expect(201);
     });
 
     it('PATCH /tasks/:id - Update with title only', () => {
-      return request(app.getHttpServer())
+      return agent
         .patch(`/tasks/${taskId}`)
         .send({ title: 'Final Task Title' })
         .expect(200)
@@ -310,21 +320,21 @@ describe('Cloudly Backend API (e2e)', () => {
     });
 
     it('PATCH /tasks/:id - Invalid: non-existent task', () => {
-      return request(app.getHttpServer())
+      return agent
         .patch('/tasks/99999')
         .send({ title: 'test' })
         .expect(404);
     });
 
     it('POST /tasks - Reject empty title', () => {
-      return request(app.getHttpServer())
+      return agent
         .post('/tasks')
         .send({ title: '', projectId: projectId })
         .expect(400);
     });
 
     it('POST /tasks - Reject whitespace-only title', () => {
-      return request(app.getHttpServer())
+      return agent
         .post('/tasks')
         .send({ title: '   ', projectId: projectId })
         .expect(400);
@@ -333,21 +343,23 @@ describe('Cloudly Backend API (e2e)', () => {
 
   describe('Cleanup', () => {
     it('DELETE /tasks/:id - Delete task', () => {
-      return request(app.getHttpServer())
+      return agent
         .delete(`/tasks/${taskId}`)
         .expect(200);
     });
 
     it('DELETE /projects/:id - Delete project', () => {
-      return request(app.getHttpServer())
+      return agent
         .delete(`/projects/${projectId}`)
         .expect(200);
     });
 
     it('DELETE /organizations/:id - Delete organization', () => {
-      return request(app.getHttpServer())
+      return agent
         .delete(`/organizations/${organizationId}`)
         .expect(200);
     });
   });
 });
+
+
