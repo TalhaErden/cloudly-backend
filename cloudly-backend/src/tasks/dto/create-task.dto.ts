@@ -1,17 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsString, Matches } from 'class-validator';
+import { IsNumber, IsString, Matches } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 export class CreateTaskDto {
   @ApiProperty({ example: 'Implement tenant guard' })
-  @Transform(({ value }) => value?.trim())
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   @IsString()
-  @IsNotEmpty()
-  @Matches(/^(?!\s*$).+/, { message: 'Title cannot be empty or only whitespace' })
+  @Matches(/\S/, { message: 'Title cannot be empty or whitespace' })
   title: string;
 
   @ApiProperty({ example: 1 })
   @IsNumber()
-  @IsNotEmpty()
   projectId: number;
 }

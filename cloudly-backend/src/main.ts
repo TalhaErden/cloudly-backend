@@ -6,9 +6,16 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // 1. Validation (DTO) Kontrollerini Aktif Et
-  // Bunu yapmazsak @IsNotEmpty gibi kurallar çalışmaz!
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
+      whitelist: true,
+      forbidNonWhitelisted: true,
+    }),
+  );
 
   // 2. Swagger Konfigürasyonu
   const config = new DocumentBuilder()

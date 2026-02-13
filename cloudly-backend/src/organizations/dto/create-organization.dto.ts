@@ -1,18 +1,17 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional, IsString, Matches } from 'class-validator';
+import { IsOptional, IsString, Matches } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 export class CreateOrganizationDto {
   @ApiProperty({ example: 'Cloudly' })
-  @Transform(({ value }) => value?.trim())
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   @IsString()
-  @IsNotEmpty()
-  @Matches(/^(?!\s*$).+/, { message: 'Name cannot be empty or only whitespace' })
+  @Matches(/\S/, { message: 'Name cannot be empty or whitespace' })
   name: string;
 
   @ApiPropertyOptional({ example: 'Istanbul, TR' })
   @IsOptional()
-  @Transform(({ value }) => value?.trim())
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   @IsString()
   address?: string;
 }

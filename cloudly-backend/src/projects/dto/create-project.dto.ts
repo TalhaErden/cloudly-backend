@@ -1,17 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsString, Matches } from 'class-validator';
+import { IsNumber, IsString, Matches } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 export class CreateProjectDto {
   @ApiProperty({ example: 'Platform Migration' })
-  @Transform(({ value }) => value?.trim())
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   @IsString()
-  @IsNotEmpty()
-  @Matches(/^(?!\s*$).+/, { message: 'Name cannot be empty or only whitespace' })
+  @Matches(/\S/, { message: 'Name cannot be empty or whitespace' })
   name: string;
 
   @ApiProperty({ example: 1 })
   @IsNumber()
-  @IsNotEmpty()
   organizationId: number;
 }
