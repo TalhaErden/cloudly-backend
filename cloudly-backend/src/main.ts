@@ -9,6 +9,14 @@ dotenv.config();  // .env dosyasını yükle
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // 1. CORS Konfigürasyonu
+  app.enableCors({
+    origin: process.env.CORS_ORIGIN || ['http://localhost:3001', 'http://localhost:3000'],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key'],
+  });
+
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
